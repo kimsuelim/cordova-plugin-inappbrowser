@@ -18,7 +18,10 @@
 */
 package org.apache.cordova.inappbrowser;
 
+import java.net.URISyntaxException;
+
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Browser;
@@ -847,7 +850,64 @@ public class InAppBrowser extends CordovaPlugin {
                     LOG.e(LOG_TAG, "Error sending sms " + url + ":" + e.toString());
                 }
             }
-            return false;
+
+            // https://forums.cocoon.io/t/loading-a-custom-url-scheme-in-the-web-view/679/2
+            if (url.startsWith("http:") || url.startsWith("https:")) {
+              return false;
+            }
+            
+            // // Otherwise allow the OS to handle it
+            // Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            // view.getContext().startActivity( intent );
+            // return true;
+
+
+            // inipay
+            Intent intent;
+
+            try {
+              Log.d("<INIPAYMOBILE>", "intent url : " + url);
+              intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+              Log.d("<INIPAYMOBILE>", "intent getDataString : " + intent.getDataString());
+              Log.d("<INIPAYMOBILE>", "intent getPackage : " + intent.getPackage() );
+            } catch (URISyntaxException ex) {
+              Log.e("<INIPAYMOBILE>", "URI syntax error : " + url + ":" + ex.getMessage());
+              return false;
+            }
+
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(intent.getDataString()));
+
+            try {
+              cordova.getActivity().startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+              if (url.startsWith("intent://")) {
+                /*************************************************************************************/
+                Log.d("<INIPAYMOBILE>", "Custom URL (intent://) 로 인입될시 마켓으로 이동되는 예외 처리: " );
+                /*************************************************************************************/
+
+                try {
+                  Intent excepIntent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                  String packageNm = excepIntent.getPackage();
+
+                  Log.d("<INIPAYMOBILE>", "excepIntent getPackage : " + packageNm);
+
+                  excepIntent = new Intent(Intent.ACTION_VIEW); 
+                  /*
+                    가맹점별로 원하시는 방식으로 사용하시면 됩니다.
+                    market URL
+                    market://search?q="+packageNm => packageNm을 검색어로 마켓 검색 페이지 이동
+                    market://search?q=pname:"+packageNm => packageNm을 패키지로 갖는 앱 검색 페이지 이동
+                    market://details?id="+packageNm => packageNm 에 해당하는 앱 상세 페이지로 이동
+                  */
+                  excepIntent.setData(Uri.parse("market://details?id=" + packageNm)); 
+                  cordova.getActivity().startActivity(excepIntent); 
+                } catch (URISyntaxException e1) {
+                  Log.e("<INIPAYMOBILE>", "INTENT:// 인입될시 예외 처리  오류 : " + e1 );
+                }
+              }
+            }
+
+            return true;
         }
 
 
