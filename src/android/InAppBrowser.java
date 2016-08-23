@@ -903,12 +903,12 @@ public class InAppBrowser extends CordovaPlugin {
             Intent intent;
 
             try {
-              Log.d("<INIPAYMOBILE>", "intent url : " + url);
+              LOG.d("<INIPAYMOBILE>", "intent url : " + url);
               intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
-              Log.d("<INIPAYMOBILE>", "intent getDataString : " + intent.getDataString());
-              Log.d("<INIPAYMOBILE>", "intent getPackage : " + intent.getPackage() );
+              LOG.d("<INIPAYMOBILE>", "intent getDataString : " + intent.getDataString());
+              LOG.d("<INIPAYMOBILE>", "intent getPackage : " + intent.getPackage() );
             } catch (URISyntaxException ex) {
-              Log.e("<INIPAYMOBILE>", "URI syntax error : " + url + ":" + ex.getMessage());
+              LOG.e("<INIPAYMOBILE>", "URI syntax error : " + url + ":" + ex.getMessage());
               return false;
             }
 
@@ -919,14 +919,14 @@ public class InAppBrowser extends CordovaPlugin {
             } catch (ActivityNotFoundException e) {
               if (url.startsWith("intent://")) {
                 /*************************************************************************************/
-                Log.d("<INIPAYMOBILE>", "Custom URL (intent://) 로 인입될시 마켓으로 이동되는 예외 처리: " );
+                LOG.d("<INIPAYMOBILE>", "Custom URL (intent://) 로 인입될시 마켓으로 이동되는 예외 처리: " );
                 /*************************************************************************************/
 
                 try {
                   Intent excepIntent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
                   String packageNm = excepIntent.getPackage();
 
-                  Log.d("<INIPAYMOBILE>", "excepIntent getPackage : " + packageNm);
+                  LOG.d("<INIPAYMOBILE>", "excepIntent getPackage : " + packageNm);
 
                   excepIntent = new Intent(Intent.ACTION_VIEW); 
                   /*
@@ -939,7 +939,7 @@ public class InAppBrowser extends CordovaPlugin {
                   excepIntent.setData(Uri.parse("market://details?id=" + packageNm)); 
                   cordova.getActivity().startActivity(excepIntent); 
                 } catch (URISyntaxException e1) {
-                  Log.e("<INIPAYMOBILE>", "INTENT:// 인입될시 예외 처리  오류 : " + e1 );
+                  LOG.e("<INIPAYMOBILE>", "INTENT:// 인입될시 예외 처리  오류 : " + e1 );
                 }
               }
             }
