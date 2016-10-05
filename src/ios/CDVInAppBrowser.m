@@ -415,6 +415,15 @@
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
 
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+
+        /* iOS 10 웹뷰에서 LSApplicationQueriesSchemes 에 등록되지 않은 URL scheme으로 앱 열기 */
+        if ([[ url scheme] isEqualToString:@"http"] || [[ url scheme] isEqualToString:@"https"]) {
+            return YES;
+        } else {
+            [theWebView stopLoading];
+            [self openInSystem:url];
+            return NO;
+        }
     }
 
     return YES;
